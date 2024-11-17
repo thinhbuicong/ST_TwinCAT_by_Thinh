@@ -1,0 +1,189 @@
+// Bo dem theo thoi gian voi 4 dau vao rieng biet
+// Cap nhat theo thoi gian
+// Ranh cho cac phan tinh toan san luonh
+
+----------------------------------------------------------------------------------
+FUNCTION_BLOCK MC_COUNTER
+VAR_INPUT
+EN      : BOOL;
+
+iInput1	: BOOL;
+iInput2	: BOOL;
+iInput3	: BOOL;
+iInput4	: BOOL;
+
+iReset  : BOOL;
+
+iHour : INT;
+iDay  : INT;
+iMonth : INT;
+iTotalCount : UDINT;
+
+END_VAR
+VAR_OUTPUT
+	ENO      : BOOL;
+	
+	qOutput1 : UDINT;
+	qOutput2 : UDINT;
+	qOutput3 : UDINT;
+	qOutput4 : UDINT;
+	
+	qOEMCntTr1 : UDINT;
+  qOEMCntTr2 : UDINT;
+  qOEMCntTr3 : UDINT;
+  qOEMCntTr4 : UDINT;
+		
+  qHourlyTR1 : UDINT;
+  qHourlyTR2 : UDINT;
+  qHourlyTR3 : UDINT;
+  qHourlyTR4 : UDINT;
+
+	qDayCntTr1 : UDINT;
+	qDayCntTr2 : UDINT;
+	qDayCntTr3 : UDINT;
+	qDayCntTr4 : UDINT;
+	
+	qMonthCntTr1 : UDINT;
+	qMonthCntTr2 : UDINT;
+	qMonthCntTr3 : UDINT;
+	qMonthCntTr4 : UDINT;
+	
+	qTotalCnt : UDINT;
+	qTotalOEM : UDINT;
+	qTotalHourCnt : UDINT;
+	qTotalDayCnt  : UDINT;
+	qTotalMonthCnt: UDINT;
+	
+  qOut_1Cntper : REAL;   
+  qOut_2Cntper : REAL;   
+  qOut_3Cntper : REAL;   
+  qOut_4Cntper : REAL;   
+	
+END_VAR
+VAR	
+	iCounter : ARRAY [1..4] OF BOOL;
+	qCounter : ARRAY [1..4] OF UDINT;
+    qHourly  : ARRAY [1..4] OF UDINT;
+    qDayCnt  : ARRAY [1..4] OF UDINT;
+	qMonthCnt   : ARRAY [1..4] OF UDINT;
+	DayCount    : ARRAY [1..4] OF UDINT;
+    OEMCnt      : ARRAY [1..4] OF UDINT;
+
+	i : INT;
+	j : INT;
+	k : INT;
+    iHourPrev :  INT := 1;
+	iDayPrev :  INT := 1;
+    iMonthPrev : INT := 1;
+   		
+END_VAR
+
+----------------------------------------------------------------------------------
+iCounter[1] :=	FALSE;
+    iCounter[2] :=	FALSE;
+    iCounter[3] :=	FALSE;
+    iCounter[4] :=	FALSE;
+
+IF EN THEN
+	ENO := TRUE;
+	iCounter[1] :=	iInput1;
+    iCounter[2] :=	iInput2;
+    iCounter[3] :=	iInput3;
+    iCounter[4] :=	iInput4;
+ELSE
+	ENO := FALSE;
+END_IF
+
+IF (iHour <> iHourPrev OR iReset)  THEN
+	qHourly[1] := 0;
+    qHourly[2] := 0;
+    qHourly[3] := 0;
+    qHourly[4] := 0;
+	IF iHour <> iHourPrev THEN
+		iHourPrev := iHour; 
+	END_IF
+END_IF
+
+IF (iDay <> iDayPrev OR iReset)  THEN
+	qDayCnt[1] := 0;
+    qDayCnt[2] := 0;
+    qDayCnt[3] := 0;
+    qDayCnt[4] := 0;
+	IF iDay <> iDayPrev THEN
+		iDayPrev := iDay; 
+	END_IF
+END_IF
+
+IF (iMonth <> iMonthPrev OR iReset)  THEN
+	qMonthCnt[1] := 0;
+    qMonthCnt[2] := 0;
+    qMonthCnt[3] := 0;
+    qMonthCnt[4] := 0;
+	IF iMonth <> iMonthPrev THEN
+		iMonthPrev := iMonth; 
+	END_IF
+END_IF
+
+IF iReset THEN
+	qCounter[1] := 0;
+	qCounter[2] := 0;
+	qCounter[3] := 0;
+	qCounter[4] := 0;
+END_IF
+
+IF (qTotalOEM = 10000000) THEN
+	OEMCnt[1] := 0;
+	OEMCnt[2] := 0;
+	OEMCnt[3] := 0;
+	OEMCnt[4] := 0;	
+END_IF
+
+FOR i := 1 TO 4 BY 1 DO 
+    IF iCounter[i] THEN
+		 qCounter[i] := qCounter[i] + 1;
+		 OEMCnt[i]   := OEMCnt[i] + 1;
+		 qHourly[i]  := qHourly[i] + 1;
+         qDayCnt[i]  := qDayCnt[i] + 1;  
+		 qMonthCnt[i]:= qMonthCnt[i] + 1;
+    END_IF
+END_FOR
+
+
+qOutput1 := qCounter[1] ;
+qOutput2 := qCounter[2] ;
+qOutput3 := qCounter[3] ;
+qOutput4 := qCounter[4] ;
+
+qOEMCntTr1 := OEMCnt[1];
+qOEMCntTr2 := OEMCnt[2];
+qOEMCntTr3 := OEMCnt[3];
+qOEMCntTr4 := OEMCnt[4];
+
+qHourlyTR1 :=  qHourly[1]; 
+qHourlyTR1 :=  qHourly[2]; 
+qHourlyTR1 :=  qHourly[3];
+qHourlyTR1 :=  qHourly[4];
+
+qDayCntTr1 := qDayCnt[1];
+qDayCntTr2 := qDayCnt[2];
+qDayCntTr3 := qDayCnt[3];
+qDayCntTr4 := qDayCnt[4]; 
+    
+qMonthCntTr1 := qMonthCnt[1];
+qMonthCntTr2 := qMonthCnt[2];
+qMonthCntTr3 := qMonthCnt[3];
+qMonthCntTr4 := qMonthCnt[4];
+
+qTotalCnt := (qOutput1 + qOutput2 + qOutput3 + qOutput4);       
+qTotalOEM := (qOEMCntTr1 + qOEMCntTr2 + qOEMCntTr3 + qOEMCntTr4);
+qTotalHourCnt := (qHourlyTR1 + qHourlyTR2 + qHourlyTR3 + qHourlyTR4);     
+qTotalDayCnt := (qDayCntTr1 + qDayCntTr2 + qDayCntTr3 + qDayCntTr4);
+qTotalMonthCnt := (qMonthCntTr1 + qMonthCntTr2 + qMonthCntTr3 + qMonthCntTr4);
+
+IF iTotalCount > 0 THEN
+	qOut_1Cntper   := (UDINT_TO_REAL(qCounter[1]) / UDINT_TO_REAL(iTotalCount)*100); 
+	qOut_2Cntper   := (UDINT_TO_REAL(qCounter[2]) / UDINT_TO_REAL(iTotalCount)*100); 
+	qOut_3Cntper   := (UDINT_TO_REAL(qCounter[3]) / UDINT_TO_REAL(iTotalCount)*100); 
+	qOut_4Cntper   := (UDINT_TO_REAL(qCounter[4]) / UDINT_TO_REAL(iTotalCount)*100); 
+END_IF
+----------------------------------------------------------------------------------
