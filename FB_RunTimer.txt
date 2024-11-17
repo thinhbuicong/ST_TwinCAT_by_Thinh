@@ -1,0 +1,34 @@
+// FB Timer using TwinCAT3
+-------------------------------------------------------------
+FUNCTION_BLOCK MC_RunTimer
+VAR_INPUT
+EN			:	BOOL;
+IN			:	BOOL;
+Scan_Time	:	INT;
+Reset		:	BOOL;
+END_VAR
+
+-------------------------------------------------------------
+IF EN THEN
+	IF IN THEN
+		iCycleTick := iCycleTick + Scan_Time;
+	END_IF
+	IF iCycleTick >= 1000 THEN
+		iSeconds 	:= iSeconds + 1;
+		iCycleTick	:= 0;
+	END_IF
+	IF iSeconds = 60 THEN
+		iMinutes := iMinutes + 1;
+		iSeconds := 0;
+	END_IF
+	IF iMinutes = 60 THEN
+		iHours := iHours + 1;
+		iMinutes := 0;
+	END_IF
+	IF Reset THEN
+		iCycleTick	:= 0;
+		iSeconds 	:= 0;
+		iMinutes 	:= 0;
+		iHours		:= 0;
+	END_IF		 
+END_IF
