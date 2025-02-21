@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="P_Warning" Id="{2d7240f4-6edf-4f06-9bf8-1e28e942cdfe}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_Warning
+VAR
+	btRun : BOOL := FALSE;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF NOT btRun THEN
+	ADSLOGSTR(msgCtrlMask := ADSLOG_MSGTYPE_ERROR OR ADSLOG_MSGTYPE_LOG,
+			  msgFmtStr := 'hi Thinh',
+			  strArg := '');
+	btRun := TRUE;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="P_Warning">
+      <LineId Id="7" Count="4" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

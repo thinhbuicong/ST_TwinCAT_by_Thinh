@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="Log_Csv" Id="{0ee1b1a8-85cb-4141-a608-07f7a6b247ce}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Log_Csv
+VAR
+	trig1 : BOOL := FALSE;
+	// Trang thai cho su kien
+	eEventType : E_EventType := E_EventType.Alarm;
+	eEventSeverity : TcEventSeverity := TcEventSeverity.Error;
+	nEventIdentity : UDINT := 32;
+	sEventText : STRING(255) := 'Status';
+	nEventID : UDINT;
+	
+	CsvPersistentEventStorage : FB_CsvPersistentEventStorage;
+	EventLogger : EventLogger(CsvPersistentEventStorage);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+IF trig1 THEN
+    // Gọi method GetEventTextByID từ CsvPersistentEventStorage để lấy text dựa trên nEventID
+    sEventText := CsvPersistentEventStorage.GetEventTextByID(nEventID);
+    // Ghi log sự kiện với thông tin đã cập nhật
+    EventLogger.AddEvent(eEventType, eEventSeverity, nEventIdentity, sEventText);
+    trig1 := FALSE;
+END_IF;
+CsvPersistentEventStorage();
+]]></ST>
+    </Implementation>
+    <LineIds Name="Log_Csv">
+      <LineId Id="5" Count="0" />
+      <LineId Id="34" Count="7" />
+      <LineId Id="33" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="LightTower" Id="{f2fc1df0-adb7-4881-8fa2-74376db605ce}">
+    <Declaration><![CDATA[INTERFACE LightTower
+]]></Declaration>
+    <Method Name="Blink" Id="{579309b6-9baf-4cc1-8024-191493ee0057}">
+      <Declaration><![CDATA[METHOD Blink : BOOL
+VAR_INPUT
+	On : BOOL;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="OnOff" Id="{527154b4-46d6-474e-be8b-e54abe4d77df}">
+      <Declaration><![CDATA[METHOD OnOff
+VAR_INPUT
+	On : BOOL;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

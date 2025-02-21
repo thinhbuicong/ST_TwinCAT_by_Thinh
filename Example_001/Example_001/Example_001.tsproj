@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.56">
+	<Project ProjectGUID="{0094C09B-FE52-4EC8-833C-9085A406546D}" Target64Bit="true" ShowHideConfigurations="#x3c7">
+		<System>
+			<Settings MaxCpus="3"/>
+			<Tasks>
+				<Task Id="3" Priority="20" CycleTime="100000" AmsPort="350" AdtTasks="true">
+					<Name>PlcTask</Name>
+				</Task>
+			</Tasks>
+		</System>
+		<Plc>
+			<Project GUID="{E544D098-6E4B-4063-98F8-95DFC6C85BC9}" Name="Ex001" PrjFilePath="Ex001\Ex001.plcproj" TmcFilePath="Ex001\Ex001.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="Ex001\Ex001.tmc" TmcHash="{DD706333-308F-D07F-38A7-41DCA996F6CC}">
+					<Name>Ex001 Instance</Name>
+					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
+					<Contexts>
+						<Context>
+							<Id>0</Id>
+							<Name>PlcTask</Name>
+							<ManualConfig>
+								<OTCID>#x02010030</OTCID>
+							</ManualConfig>
+							<Priority>20</Priority>
+							<CycleTime>10000000</CycleTime>
+						</Context>
+					</Contexts>
+					<TaskPouOids>
+						<TaskPouOid Prio="20" OTCID="#x08502001"/>
+					</TaskPouOids>
+				</Instance>
+			</Project>
+		</Plc>
+	</Project>
+</TcSmProject>

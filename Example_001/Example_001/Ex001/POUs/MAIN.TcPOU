@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="MAIN" Id="{34d18c9a-9e76-4259-870a-92776b81b936}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	//st_Fupdate : ST_Event;
+	btOne : BOOL := FALSE;
+	
+	// Trang thai cho su kien
+	eEventType : E_EventType := E_EventType.Alarm;
+	eEventSeverity : TcEventSeverity := TcEventSeverity.Error;
+	nEventIdentity : UDINT := 32;
+	sEventText : STRING(255) := 'Status';
+	
+	XmlPersistentEventStorage : FB_XmlPersistentEventStorage;
+	EventLogger : EventLogger(XmlPersistentEventStorage);
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// P_Warning();
+(*
+IF NOT btOne THEN
+	F_UpdateEventTimestampWithSystemTime(stEvent := st_Fupdate);
+	btOne := TRUE;
+END_IF
+*)
+
+(*IF btOne THEN
+	EventLogger.AddEvent(eEventType, eEventSeverity, nEventIdentity, sEventText);
+	btOne := FALSE;
+END_IF*)
+Log_Csv();]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="2" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="51" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

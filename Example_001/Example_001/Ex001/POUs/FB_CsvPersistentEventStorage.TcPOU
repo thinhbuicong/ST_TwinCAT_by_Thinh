@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_CsvPersistentEventStorage" Id="{a548ae64-4203-4542-b204-0fb2c75bebdb}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CsvPersistentEventStorage IMPLEMENTS I_PersistentEventStorage
+VAR
+	fbFileOpen : FB_FileOpen := (sPathName :='D:\folderData\Twincat\TestCSV\Event20.log', nMode := FOPEN_MODEAPPEND OR FOPEN_MODETEXT);
+	fbFilePuts : FB_FilePuts;
+	fbFileClose : FB_FileClose;
+	eWriteState : (FILE_OPEN_TRIGGER,FILE_OPEN, WAIT_FOR_EVENT, WRITE_EVENT_TRIGGER, WRITE_EVENT, FILE_CLOSE_TRIGGER, FILE_CLOSE, ERROR);
+	stEventWrittenToFile : ST_Event;
+	
+	CsvString : T_MaxString;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+	S1: FILE_OPEN_TRIGGER: Kích hoạt mở file.
+	S2: FILE_OPEN: Kiểm tra trạng thái mở file, xử lý lỗi nếu có.
+	S3: WAIT_FOR_EVENT: Chờ sự kiện cần ghi.
+	S4: WRITE_EVENT_TRIGGER: Tạo chuỗi CSV và kích hoạt ghi.
+	S5: WRITE_EVENT: Ghi dữ liệu vào file, kiểm tra lỗi khi ghi.
+	S6: FILE_CLOSE_TRIGGER: Kích hoạt đóng file.
+	S7: FILE_CLOSE: Đóng file và quay lại trạng thái mở file.
+	S8: ERROR: Xử lý lỗi, không thực hiện hành động khác.
+*)
+
+CASE eWriteState OF
+    // Lua chon hanh dong dua vao trang thai hien tai cua eWriteState
+    
+    FILE_OPEN_TRIGGER :
+        fbFileOpen(bExecute := TRUE);
+        // Bat dau mo file bang cach kich hoat fbFileOpen
+        eWriteState := FILE_OPEN;
+        // Chuyen sang trang thai FILE_OPEN de xu ly tiep
+
+    FILE_OPEN :
+        fbFileOpen(bExecute := FALSE);
+        // Ngung kich hoat fbFileOpen sau khi da goi lenh mo file
+        IF fbFileOpen.bError THEN
+            eWriteState := ERROR;
+            // Neu co loi xay ra trong qua trinh mo file, chuyen sang trang thai ERROR
+        ELSIF NOT fbFileOpen.bBusy AND fbFileOpen.hFile <> 0 THEN
+            eWriteState := WAIT_FOR_EVENT;
+            // Neu file mo thanh cong va khong con ban, chuyen sang trang thai WAIT_FOR_EVENT
+        END_IF
+
+    WAIT_FOR_EVENT:
+        // Do no thing
+
+    WRITE_EVENT_TRIGGER :
+        CsvString := CreateCsvString(stEvent := stEventWrittenToFile);
+        // Tao chuoi CSV dua tren du lieu su kien stEventWrittenToFile
+        fbFilePuts(bExecute := TRUE,
+                   sLine := CsvString,
+                   hFile := fbFileOpen.hFile);
+        // Kich hoat fbFilePuts de ghi chuoi CSV vao file
+        eWriteState := WRITE_EVENT;
+        // Chuyen sang trang thai WRITE_EVENT de xu ly ghi du lieu
+
+    WRITE_EVENT :
+        fbFilePuts(bExecute := FALSE);
+        // Ngung kich hoat fbFilePuts sau khi goi lenh ghi du lieu
+        IF fbFilePuts.bError THEN
+            eWriteState := ERROR;
+            // Neu co loi trong qua trinh ghi, chuyen sang trang thai ERROR
+        ELSIF NOT fbFilePuts.bBusy THEN
+            eWriteState := FILE_CLOSE_TRIGGER;
+            // Neu ghi thanh cong va hoan tat, chuyen sang trang thai FILE_CLOSE_TRIGGER
+        END_IF
+
+    FILE_CLOSE_TRIGGER :
+        fbFileClose(bExecute := TRUE,
+                    hFile := fbFileOpen.hFile);
+        // Kich hoat fbFileClose de dong file
+        eWriteState := FILE_CLOSE;
+        // Chuyen sang trang thai FILE_CLOSE de xu ly tiep
+
+    FILE_CLOSE :
+        fbFileClose(bExecute := FALSE);
+        // Ngung kich hoat fbFileClose sau khi goi lenh dong file
+        IF fbFileClose.bError THEN
+            eWriteState := ERROR;
+            // Neu co loi trong qua trinh dong file, chuyen sang trang thai ERROR
+        ELSIF NOT fbFileClose.bBusy THEN
+            eWriteState := FILE_OPEN_TRIGGER;
+            // Neu dong file thanh cong, quay lai trang thai FILE_OPEN_TRIGGER
+        END_IF
+
+    ERROR:
+        // Do no thing
+
+END_CASE
+
+]]></ST>
+    </Implementation>
+    <Method Name="CreateCsvString" Id="{587209fc-5633-497c-b829-12c3dee999ce}">
+      <Declaration><![CDATA[METHOD PRIVATE CreateCsvString : T_MaxString
+VAR_INPUT
+	stEvent : REFERENCE TO ST_Event;
+END_VAR
+VAR
+	TempString : T_MaxString;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[TempString := TO_STRING(stEvent.eEventType);
+TempString := CONCAT(STR1 := TempString, STR2 := ',');
+TempString := CONCAT(STR1 := TempString, STR2 := TO_STRING(stEvent.eEventSeverity));
+TempString := CONCAT(STR1 := TempString, STR2 := ',');
+TempString := CONCAT(STR1 := TempString, STR2 := TO_STRING(stEvent.nEventIdentity));
+TempString := CONCAT(STR1 := TempString, STR2 := ',');
+TempString := CONCAT(STR1 := TempString, STR2 := stEvent.sEventText);
+TempString := CONCAT(STR1 := TempString, STR2 := ',');
+TempString := CONCAT(STR1 := TempString, STR2 := TO_STRING(stEvent.dtTimestamp));
+TempString := CONCAT(STR1 := TempString, STR2 := '$n');
+
+CreateCsvString := TempString;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetEventTextByID" Id="{dd403f9a-861f-4d9f-aa87-ef8e62974adb}">
+      <Declaration><![CDATA[METHOD PUBLIC GetEventTextByID : T_MaxString
+VAR_INPUT
+	nID : UDINT; 
+END_VAR
+VAR
+	sResult : T_MaxString; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE nID OF
+    1: sResult := 'Error: Sensor not connected';
+    2: sResult := 'Warning: Temperature high';
+    3: sResult := 'Info: System started';
+	4: sResult := 'Hello everyone';
+    ELSE
+        sResult := 'Unknown Event';
+END_CASE;
+
+GetEventTextByID := sResult; ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="StoreEvent" Id="{309f1c90-98d9-40c3-8462-8ab8fae1d178}">
+      <Declaration><![CDATA[METHOD StoreEvent
+VAR_INPUT
+	stEvent	: ST_Event;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// T132S
+IF eWriteState = WAIT_FOR_EVENT THEN
+	eWriteState := WRITE_EVENT_TRIGGER;
+	stEventWrittenToFile := stEvent;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_CsvPersistentEventStorage">
+      <LineId Id="162" Count="7" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="87" Count="64" />
+      <LineId Id="85" Count="1" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CsvPersistentEventStorage.CreateCsvString">
+      <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="18" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CsvPersistentEventStorage.GetEventTextByID">
+      <LineId Id="23" Count="1" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="30" Count="3" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CsvPersistentEventStorage.StoreEvent">
+      <LineId Id="16" Count="0" />
+      <LineId Id="7" Count="1" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
